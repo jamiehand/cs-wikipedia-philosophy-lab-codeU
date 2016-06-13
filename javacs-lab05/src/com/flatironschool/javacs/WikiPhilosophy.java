@@ -3,6 +3,9 @@ package com.flatironschool.javacs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+
+import java.lang.Character;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -29,6 +32,9 @@ public class WikiPhilosophy {
 	 */
 	public static void main(String[] args) throws IOException {
 
+		/* stack to keep track of parentheses */
+		Stack<Integer> parenStack = new Stack<Integer>();
+
         // some example code to get you started
 
 		String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
@@ -36,7 +42,8 @@ public class WikiPhilosophy {
 		// parse into paragraphs
 		Elements paragraphs = wf.fetchWikipedia(url);
 
-		url = getFirstValidLink(paragraphs);
+		url = getFirstValidLink(paragraphs, url, parenStack);
+		parenStack = new Stack<Integer>();
 
 		// Element firstPara = paragraphs.get(0);
 		//
@@ -54,16 +61,35 @@ public class WikiPhilosophy {
     throw new UnsupportedOperationException(msg);
 	}
 
-	static String getFirstValidLink(Elements paragraphs) {
+	static String getFirstValidLink(Elements paragraphs, String currentURL,
+												Stack<Integer> parenStack) {
 		for (Element para: paragraphs) {
 			Iterable<Node> iter = new WikiNodeIterable(para);
 			for (Node node: iter) {
+				if (node instanceof TextNode) {
+					checkForParens(node, parenStack);
+					if (node.attr("text").equals("Green")) {
+						System.out.println("******* FOUND GREEN *****");
+					}
+					// System.out.println(parenStack.isEmpty());
+				}
+				/* verify it's a link */
 				if (node.hasAttr("href")) {
-					// if (node instanceof TextNode) {
-						// System.out.print(node);
-						String absURL = node.attr("abs:href");
-						System.out.print(absURL);
-					// }
+					/* verify the parenStack is empty (i.e. we're not w/in parentheses) */
+					if (parenStack.isEmpty()) {
+						String newURL = node.attr("abs:href");
+						/* verify it's not a link to the current page */
+						if (!newURL.equals(currentURL)) {
+							Node childNode = node.childNode(0);
+							/* verify the node is text (not title) and lowercase */
+							if (isTextAndLowerCase(childNode)) {
+								// System.out.println(childNode.attr("text"));
+								if (notInItalics(childNode)) {
+									// System.out.println(childNode.attr("text"));
+								}
+							}
+						}
+					}
 				}
 
 				// Elements links = node.select("a");
@@ -72,8 +98,52 @@ public class WikiPhilosophy {
 				// }
 			}
 		}
-		return "asdf";
+		return "TODO return new url here";
 	}
 
+	static boolean notInItalics(Node node) {
+		/* check all ancestors of node to see if they italicize their children */
+
+		/* base case: reached root without finding 'i' or 'em' tag */
+		// if (node.parent() == null) {
+		// 	return true;
+		// } else (if node.parent() contains i or em) { // TODO this
+		// 	return false;
+		// } else {
+		// 	return notInItalics(node.parent());
+		// }
+
+		return true; // TODO remove this line
+	}
+
+	static boolean isTextAndLowerCase(Node node) {
+		/* make sure it's a node with text, rather than a title;
+		 * nodes with "titles" contain information like "The time period
+		 * mentioned near this tag is ambiguous. (December 2014)", not
+		 * the link text that we want. */
+		if (node.hasAttr("text")){
+			Character firstChar = node.attr("text").charAt(0);
+			if (Character.isLowerCase(firstChar)) {
+				// System.out.println(node.attr("text"));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static void checkForParens(Node node, Stack<Integer> parenStack) {
+		/* push a '1' for new open parentheses; pop for new close parentheses */
+		String nodeString = node.toString();
+		for (int i=0; i<nodeString.length(); i++) {
+			Character currentChar = nodeString.charAt(i);
+			if (currentChar == '(') {
+				parenStack.push(1);
+				// System.out.print(nodeString.charAt(i));
+			} else if (currentChar == ')') {
+				parenStack.pop();
+				// System.out.print(nodeString.charAt(i));
+			}
+		}
+	}
 
 }
