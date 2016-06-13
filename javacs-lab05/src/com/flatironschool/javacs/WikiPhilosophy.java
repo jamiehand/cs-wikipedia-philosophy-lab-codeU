@@ -31,34 +31,26 @@ public class WikiPhilosophy {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-
-		/* stack to keep track of parentheses */
-		Stack<Integer> parenStack = new Stack<Integer>();
-
-        // some example code to get you started
-
 		String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
+		testPhilosophyConjecture(url);
+	}
 
-		// parse into paragraphs
-		Elements paragraphs = wf.fetchWikipedia(url);
+	static void testPhilosophyConjecture(String url) throws IOException {
+		/* stack to keep track of parentheses */
+		Stack<Integer> parenStack;
+		/* int to keep track of how many links followed so far */
+		int numLinks = 1;
 
-		url = getFirstValidLink(paragraphs, url, parenStack);
-		parenStack = new Stack<Integer>();
+		while (!url.equals("https://en.wikipedia.org/wiki/Philosophy")) {
+			parenStack = new Stack<Integer>();
+			// parse into paragraphs
+			Elements paragraphs = wf.fetchWikipedia(url);
+			url = getFirstValidLink(paragraphs, url, parenStack);
+			numLinks++;
+		}
 
-		// Element firstPara = paragraphs.get(0);
-		//
-		// Iterable<Node> iter = new WikiNodeIterable(firstPara);
-		// for (Node node: iter) {
-		// 	// System.out.println("\nprinting");
-		// 	if (node instanceof TextNode) {
-		// 		System.out.print(node);
-		// 	}
-    // }
-
-    // the following throws an exception so the test fails
-    // until you update the code
-    String msg = "Complete this lab by adding your code and removing this statement.";
-    throw new UnsupportedOperationException(msg);
+		System.out.println("Success!! We reached the Philosophy page in " +
+											 numLinks + " links.");
 	}
 
 	static String getFirstValidLink(Elements paragraphs, String currentURL,
