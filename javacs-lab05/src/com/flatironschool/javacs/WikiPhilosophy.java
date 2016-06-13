@@ -70,6 +70,14 @@ public class WikiPhilosophy {
 					checkForParens(node, parenStack);
 					if (node.attr("text").equals("Green")) {
 						System.out.println("******* FOUND GREEN *****");
+
+						Element parentElement = (Element) node.parent();
+						System.out.println(parentElement);
+						System.out.println(parentElement.tag());
+						if (parentElement.tag().toString().equals("i") ||
+						    parentElement.tag().toString().equals("em")) {
+							System.out.println("** there is a tag with i or em! **");
+						}
 					}
 					// System.out.println(parenStack.isEmpty());
 				}
@@ -103,17 +111,26 @@ public class WikiPhilosophy {
 
 	static boolean notInItalics(Node node) {
 		/* check all ancestors of node to see if they italicize their children */
+		Node parent = node.parent();
 
 		/* base case: reached root without finding 'i' or 'em' tag */
-		// if (node.parent() == null) {
-		// 	return true;
-		// } else (if node.parent() contains i or em) { // TODO this
-		// 	return false;
-		// } else {
-		// 	return notInItalics(node.parent());
-		// }
+		if (node.parent() == null) {
+			return true;
+		}
 
-		return true; // TODO remove this line
+		/* if this is an Element, check whether its tag is 'i' or 'em' */
+		if (parent instanceof Element) {
+			Element parentElement = (Element) parent;
+			// System.out.println(parentElement);
+			// System.out.println(parentElement.tag());
+			if (parentElement.tag().toString().equals("i") ||
+					parentElement.tag().toString().equals("em")) {
+				return false;
+			}
+		}
+
+		/* keep checking up the ancestors */
+		return notInItalics(node.parent());
 	}
 
 	static boolean isTextAndLowerCase(Node node) {
