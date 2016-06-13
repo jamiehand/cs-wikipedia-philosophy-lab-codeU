@@ -68,19 +68,8 @@ public class WikiPhilosophy {
 			for (Node node: iter) {
 				if (node instanceof TextNode) {
 					checkForParens(node, parenStack);
-					if (node.attr("text").equals("Green")) {
-						System.out.println("******* FOUND GREEN *****");
-
-						Element parentElement = (Element) node.parent();
-						System.out.println(parentElement);
-						System.out.println(parentElement.tag());
-						if (parentElement.tag().toString().equals("i") ||
-						    parentElement.tag().toString().equals("em")) {
-							System.out.println("** there is a tag with i or em! **");
-						}
 					}
-					// System.out.println(parenStack.isEmpty());
-				}
+
 				/* verify it's a link */
 				if (node.hasAttr("href")) {
 					/* verify the parenStack is empty (i.e. we're not w/in parentheses) */
@@ -91,23 +80,22 @@ public class WikiPhilosophy {
 							Node childNode = node.childNode(0);
 							/* verify the node is text (not title) and lowercase */
 							if (isTextAndLowerCase(childNode)) {
-								// System.out.println(childNode.attr("text"));
+								/* verify it's not in italics */
 								if (notInItalics(childNode)) {
-									// System.out.println(childNode.attr("text"));
+									System.out.println(childNode.attr("text"));
+									return newURL;
 								}
 							}
 						}
 					}
-				}
+			  }  /* end link if statement */
 
-				// Elements links = node.select("a");
-				// for (Element link: links) {
-				// 	System.out.print(link);
-				// }
 			}
 		}
-		return "TODO return new url here";
+		System.exit(1); // No valid link found.
+		return "This should not be reached.";
 	}
+
 
 	static boolean notInItalics(Node node) {
 		/* check all ancestors of node to see if they italicize their children */
@@ -121,8 +109,6 @@ public class WikiPhilosophy {
 		/* if this is an Element, check whether its tag is 'i' or 'em' */
 		if (parent instanceof Element) {
 			Element parentElement = (Element) parent;
-			// System.out.println(parentElement);
-			// System.out.println(parentElement.tag());
 			if (parentElement.tag().toString().equals("i") ||
 					parentElement.tag().toString().equals("em")) {
 				return false;
@@ -141,7 +127,6 @@ public class WikiPhilosophy {
 		if (node.hasAttr("text")){
 			Character firstChar = node.attr("text").charAt(0);
 			if (Character.isLowerCase(firstChar)) {
-				// System.out.println(node.attr("text"));
 				return true;
 			}
 		}
@@ -155,10 +140,8 @@ public class WikiPhilosophy {
 			Character currentChar = nodeString.charAt(i);
 			if (currentChar == '(') {
 				parenStack.push(1);
-				// System.out.print(nodeString.charAt(i));
 			} else if (currentChar == ')') {
 				parenStack.pop();
-				// System.out.print(nodeString.charAt(i));
 			}
 		}
 	}
